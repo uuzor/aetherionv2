@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Menu, X, ChevronLeft } from 'lucide-react';
+import { Coins, Menu, X, ChevronLeft } from 'lucide-react';
 import { navigate } from '../router';
 import { WalletButton } from './WalletButton';
+import { TokenFaucetModal } from './TokenFaucetModal';
 
 type Props = {
   breadcrumbs?: { label: string; path: string }[];
@@ -10,6 +11,7 @@ type Props = {
 export function AppNav({ breadcrumbs = [] }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [tokensOpen, setTokensOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -78,6 +80,14 @@ export function AppNav({ breadcrumbs = [] }: Props) {
           >
             Sign in
           </button>
+          <button
+            onClick={() => setTokensOpen(true)}
+            className="flex items-center gap-2 rounded-btn border border-chalk/10 bg-graphite/30 px-4 py-3 font-medium text-bone transition-colors hover:border-citrine/30"
+            style={{ fontSize: '12px' }}
+          >
+            <Coins size={14} className="text-citrine" />
+            Tokens
+          </button>
           <WalletButton
             className="flex items-center gap-2 rounded-btn bg-citrine px-6 py-3 font-medium text-carbon transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           />
@@ -107,9 +117,22 @@ export function AppNav({ breadcrumbs = [] }: Props) {
             <WalletButton
               className="mt-2 flex items-center justify-center gap-2 rounded-btn bg-citrine px-6 py-3 font-medium text-carbon disabled:cursor-not-allowed disabled:opacity-60"
             />
+            <button
+              onClick={() => {
+                setTokensOpen(true);
+                setMobileOpen(false);
+              }}
+              className="flex items-center justify-center gap-2 rounded-btn border border-chalk/10 bg-graphite/30 px-6 py-3 font-medium text-bone"
+              style={{ fontSize: '14px' }}
+            >
+              <Coins size={15} className="text-citrine" />
+              Tokens
+            </button>
           </div>
         </div>
       )}
+
+      <TokenFaucetModal open={tokensOpen} onClose={() => setTokensOpen(false)} />
     </header>
   );
 }

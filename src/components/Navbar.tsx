@@ -55,7 +55,7 @@ export function Navbar() {
             className="font-medium uppercase tracking-[0.032em] text-bone/70 transition-colors hover:text-bone"
             style={{ fontSize: '12px' }}
           >
-            Sign in
+            Sign in to
           </a>
           <a
             href="#play"

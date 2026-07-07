@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 function LandingPage() {
   return (
     <>
-      <Navbar />
+      <AppNav />
       <main>
         <Hero />
         <LogoCloud />
