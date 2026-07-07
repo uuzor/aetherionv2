@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Menu, X, ChevronLeft } from 'lucide-react';
 import { navigate } from '../router';
+import { WalletButton } from './WalletButton';
 
 type Props = {
   breadcrumbs?: { label: string; path: string }[];
@@ -30,12 +31,8 @@ export function AppNav({ breadcrumbs = [] }: Props) {
           scrolled ? 'border border-chalk/10 bg-carbon/80 backdrop-blur-md' : 'border border-chalk/10 bg-carbon/60 backdrop-blur-sm'
         }`}
       >
-        {/* Left: wordmark + breadcrumbs */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
+          <button onClick={() => navigate('/')} className="flex items-center gap-2">
             <span className="inline-block h-3 w-3 rotate-45 bg-citrine" />
             <span className="font-medium tracking-[0.027em] text-bone" style={{ fontSize: '20px' }}>
               UNEVENTFUL
@@ -60,7 +57,6 @@ export function AppNav({ breadcrumbs = [] }: Props) {
           )}
         </div>
 
-        {/* Desktop nav */}
         <div className="hidden items-center gap-8 lg:flex">
           {navLinks.map((link) => (
             <button
@@ -74,7 +70,6 @@ export function AppNav({ breadcrumbs = [] }: Props) {
           ))}
         </div>
 
-        {/* CTA */}
         <div className="hidden items-center gap-3 lg:flex">
           <button
             onClick={() => navigate('/')}
@@ -83,27 +78,16 @@ export function AppNav({ breadcrumbs = [] }: Props) {
           >
             Sign in
           </button>
-          <button
-            onClick={() => navigate('/explore')}
-            className="flex items-center gap-2 rounded-btn bg-citrine px-6 py-3 font-medium text-carbon transition-opacity hover:opacity-90"
-            style={{ fontSize: '14px' }}
-          >
-            <span className="inline-block h-2 w-2 bg-carbon" />
-            Connect Wallet
-          </button>
+          <WalletButton
+            className="flex items-center gap-2 rounded-btn bg-citrine px-6 py-3 font-medium text-carbon transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          />
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          className="text-bone lg:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
+        <button className="text-bone lg:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </nav>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="absolute left-4 right-4 top-20 rounded-card border border-chalk/10 bg-carbon/95 p-6 backdrop-blur-md lg:hidden">
           <div className="flex flex-col gap-4">
@@ -120,17 +104,9 @@ export function AppNav({ breadcrumbs = [] }: Props) {
                 {link.label}
               </button>
             ))}
-            <button
-              onClick={() => {
-                navigate('/explore');
-                setMobileOpen(false);
-              }}
-              className="mt-2 flex items-center justify-center gap-2 rounded-btn bg-citrine px-6 py-3 font-medium text-carbon"
-              style={{ fontSize: '14px' }}
-            >
-              <span className="inline-block h-2 w-2 bg-carbon" />
-              Connect Wallet
-            </button>
+            <WalletButton
+              className="mt-2 flex items-center justify-center gap-2 rounded-btn bg-citrine px-6 py-3 font-medium text-carbon disabled:cursor-not-allowed disabled:opacity-60"
+            />
           </div>
         </div>
       )}

@@ -10,6 +10,8 @@ import { Footer } from './components/Footer';
 import { ExplorePage } from './components/ExplorePage';
 import { GameHubPage } from './components/GameHubPage';
 import { RoomPage } from './components/RoomPage';
+import { MinorityWinsHubPage } from './components/MinorityWinsHubPage';
+import { MinorityWinsMarketPage } from './components/MinorityWinsMarketPage';
 import { useRoute, navigate } from './router';
 import { getGame } from './data/games';
 import { useEffect } from 'react';
@@ -34,7 +36,6 @@ function LandingPage() {
 function App() {
   const route = useRoute();
 
-  // Update "Launch App" / "Play" links on the landing page to route into the app
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -61,6 +62,35 @@ function App() {
       <div className="min-h-screen bg-carbon text-bone">
         <AppNav breadcrumbs={[]} />
         <ExplorePage />
+      </div>
+    );
+  }
+
+  if (route.name === 'minorityWinHub') {
+    return (
+      <div className="min-h-screen bg-carbon text-bone">
+        <AppNav
+          breadcrumbs={[
+            { label: 'Explore', path: '/explore' },
+            { label: 'MinorityWin', path: '/game/minority-win' },
+          ]}
+        />
+        <MinorityWinsHubPage />
+      </div>
+    );
+  }
+
+  if (route.name === 'minorityWinMarket') {
+    return (
+      <div className="min-h-screen bg-carbon text-bone">
+        <AppNav
+          breadcrumbs={[
+            { label: 'Explore', path: '/explore' },
+            { label: 'MinorityWin', path: '/game/minority-win' },
+            { label: 'Market', path: `/game/minority-win/market/${route.marketId}` },
+          ]}
+        />
+        <MinorityWinsMarketPage marketId={route.marketId} />
       </div>
     );
   }
