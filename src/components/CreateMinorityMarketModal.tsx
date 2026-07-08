@@ -56,7 +56,6 @@ export function CreateMinorityMarketModal({
   const [durationHours, setDurationHours] = useState('24');
   const [error, setError] = useState('');
 
-  console.log(tokenPairs)
 
   const selectedPair = useMemo(
     () => tokenPairs.find((pair) => pair.tokenAddress === stakeToken),
