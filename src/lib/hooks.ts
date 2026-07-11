@@ -169,6 +169,18 @@ export function useSubmitPick(contractAddress: Address = MINORITY_WINS_ADDRESS) 
       if (choice < 0 || choice > 2) {
         throw new Error('Choice must be 0, 1, or 2.');
       }
+      console.log(choice)
+
+      try {
+        const encry = await encrypt.mutateAsync({
+          values: [{ value: BigInt(choice), type: 'euint8' }],
+          contractAddress,
+          userAddress: address,
+        });
+        console.log(encry)
+      } catch (error) {
+        console.log(error)
+      }
 
       const encrypted = await encrypt.mutateAsync({
         values: [{ value: BigInt(choice), type: 'euint8' }],

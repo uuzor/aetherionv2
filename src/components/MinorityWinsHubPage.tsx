@@ -83,7 +83,7 @@ function RoomRow({ room }: { room: GameRoom }) {
         {room.options.slice(0, 3).map((opt, i) => (
           <div key={i} title={opt.label}>
             {opt.imageUrl ? (
-              <img src={opt.imageUrl} alt={opt.label} className="h-10 w-10 overflow-hidden border border-chalk/10 object-cover" />
+              <img src={opt.imageUrl} alt={opt.label} crossOrigin="anonymous" className="h-10 w-10 overflow-hidden border border-chalk/10 object-cover" />
             ) : (
               fallbackTile(opt.label)
             )}
@@ -118,7 +118,7 @@ export function MinorityWinsHubPage() {
   const [filter, setFilter] = useState('all');
   const [createOpen, setCreateOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const { markets, createMarket } = useMinorityWinMarkets();
+  const { markets, createMarket, isLoading: marketsLoading, error: marketsError } = useMinorityWinMarkets();
   const { createGame } = useCreateGame();
   const { pairs: tokenPairs, isLoading: tokenRegistryLoading } = useTokenRegistryPairs(createOpen);
   const liveGameId = markets.find((market) => market.contractGameId !== undefined)?.contractGameId;
@@ -144,7 +144,7 @@ export function MinorityWinsHubPage() {
 
     return {
       address: pair.tokenAddress,
-      label: `${symbolLabel} · ${shortAddress}`,
+      label: `${symbolLabel} ï¿½ ${shortAddress}`,
       decimals: meta.decimals,
       confidentialTokenAddress: pair.confidentialTokenAddress,
     };
@@ -213,7 +213,7 @@ export function MinorityWinsHubPage() {
       const parsedStake = parseUnits(payload.stakeAmount, selectedToken.decimals);
       const { gameId } = await createGame(payload.question, payload.stakeToken, parsedStake, durationSeconds);
       const marketId = `mw-${gameId.toString()}`;
-      const tokenSymbol = selectedToken.label.split(' · ')[0];
+      const tokenSymbol = selectedToken.label.split(' ï¿½ ')[0];
 
       const questionImageUpload = payload.questionImage
         ? await uploadMarketImage(payload.questionImage, marketId, 'question')
@@ -229,7 +229,7 @@ export function MinorityWinsHubPage() {
         })
       );
 
-      const createdMarket = createMarket({
+      const createdMarket = await createMarket({
         id: marketId,
         contractGameId: gameId,
         question: payload.question,
@@ -258,7 +258,7 @@ export function MinorityWinsHubPage() {
               <div className="mb-4 flex items-center gap-3">
                 <span className={`inline-block h-2 w-2 rounded-full ${isLive ? 'bg-citrine' : 'bg-stone'}`} />
                 <span className="font-medium uppercase tracking-[0.032em] text-citrine" style={{ fontSize: '10px' }}>
-                  {game.status} · {game.category}
+                  {game.status} ï¿½ {game.category}
                 </span>
               </div>
 
@@ -305,7 +305,7 @@ export function MinorityWinsHubPage() {
             </div>
           </div>
 
-          <div className="mt-20 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-chalk/10 bg-chalk/10 sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-chalk/10 bg-chalk/10 sm:grid-cols-4">
             {stats.map((stat) => (
               <div key={stat.label} className="bg-carbon p-6">
                 <div className="flex items-center gap-2">
@@ -320,8 +320,65 @@ export function MinorityWinsHubPage() {
               </div>
             ))}
           </div>
+           <div className="mt-12">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="inline-block h-2 w-2 bg-citrine" />
+                  <span className="font-medium uppercase tracking-[0.032em] text-citrine" style={{ fontSize: '10px' }}>
+                    SOCIAL MARKETS
+                  </span>
+                </div>
+                <h2 className="font-normal uppercase text-bone" style={{ fontSize: 'clamp(28px, 4vw, 40px)', lineHeight: 0.9, letterSpacing: '-0.01em' }}>
+                  Active rounds
+                </h2>
+              </div>
 
-          <div className="mt-24">
+              <div className="flex flex-wrap items-center gap-2">
+                {roomFilters.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={`rounded-btn border px-3 py-1.5 font-medium uppercase tracking-[0.032em] transition-colors ${filter === f ? 'border-citrine/40 bg-citrine/10 text-citrine' : 'border-chalk/10 bg-graphite/20 text-stone hover:text-bone'}`}
+                    style={{ fontSize: '10px' }}
+                  >
+                    {f === 'all' ? 'ALL' : f}
+                  </button>
+                ))}
+                <button onClick={() => setCreateOpen(true)} className="flex items-center gap-1.5 rounded-btn bg-citrine px-4 py-1.5 font-medium text-carbon transition-opacity hover:opacity-90" style={{ fontSize: '10px' }}>
+                  <Plus size={12} />
+                  CREATE MARKET
+                </button>
+              </div>
+            </div>
+
+            {marketsError ? (
+              <div className="mb-4 border border-amber-400/20 bg-amber-400/5 px-4 py-3 text-stone" style={{ fontSize: '13px' }}>
+                {marketsError}
+              </div>
+            ) : null}
+
+            {marketsLoading ? (
+              <div className="mb-4 border border-chalk/10 bg-graphite/20 px-4 py-3 text-stone" style={{ fontSize: '13px' }}>
+                Loading markets from Supabase...
+              </div>
+            ) : null}
+
+            <div className="space-y-px">
+              {filteredRooms.map((room) => (
+                <RoomRow key={room.id} room={room} />
+              ))}
+            </div>
+
+            {!marketsLoading && filteredRooms.length === 0 && (
+              <div className="flex flex-col items-center justify-center border border-chalk/10 bg-graphite/20 py-16 text-center">
+                <CitrineCube size={50} glow="soft" />
+                <p className="mt-4 text-stone" style={{ fontSize: '14px' }}>No markets match this filter.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-12">
             <div className="mb-8 flex items-center gap-3">
               <span className="inline-block h-2 w-2 bg-citrine" />
               <span className="font-medium uppercase tracking-[0.032em] text-citrine" style={{ fontSize: '10px' }}>
@@ -355,51 +412,7 @@ export function MinorityWinsHubPage() {
             </div>
           </div>
 
-          <div className="mt-24">
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="mb-3 flex items-center gap-3">
-                  <span className="inline-block h-2 w-2 bg-citrine" />
-                  <span className="font-medium uppercase tracking-[0.032em] text-citrine" style={{ fontSize: '10px' }}>
-                    SOCIAL MARKETS
-                  </span>
-                </div>
-                <h2 className="font-normal uppercase text-bone" style={{ fontSize: 'clamp(28px, 4vw, 40px)', lineHeight: 0.9, letterSpacing: '-0.01em' }}>
-                  Active rounds
-                </h2>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                {roomFilters.map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => setFilter(f)}
-                    className={`rounded-btn border px-3 py-1.5 font-medium uppercase tracking-[0.032em] transition-colors ${filter === f ? 'border-citrine/40 bg-citrine/10 text-citrine' : 'border-chalk/10 bg-graphite/20 text-stone hover:text-bone'}`}
-                    style={{ fontSize: '10px' }}
-                  >
-                    {f === 'all' ? 'ALL' : f}
-                  </button>
-                ))}
-                <button onClick={() => setCreateOpen(true)} className="flex items-center gap-1.5 rounded-btn bg-citrine px-4 py-1.5 font-medium text-carbon transition-opacity hover:opacity-90" style={{ fontSize: '10px' }}>
-                  <Plus size={12} />
-                  CREATE MARKET
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-px">
-              {filteredRooms.map((room) => (
-                <RoomRow key={room.id} room={room} />
-              ))}
-            </div>
-
-            {filteredRooms.length === 0 && (
-              <div className="flex flex-col items-center justify-center border border-chalk/10 bg-graphite/20 py-16 text-center">
-                <CitrineCube size={50} glow="soft" />
-                <p className="mt-4 text-stone" style={{ fontSize: '14px' }}>No markets match this filter.</p>
-              </div>
-            )}
-          </div>
+         
         </div>
       </div>
 

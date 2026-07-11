@@ -9,9 +9,17 @@ import { injected } from 'wagmi/connectors';
 import { sepolia } from 'wagmi/chains';
 
 const rpcUrl =
-  (import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined) ?? 'https://eth-sepolia-testnet.api.pocket.network';
+  (import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined) ?? sepoliaFhe.network;
+
+// The Zama testnet relayer only sends CORS headers on GET, not on the encrypt
+// POST (/input-proof), so a browser cross-origin POST is blocked and encrypt()
+// hangs 30s ("Worker operation ENCRYPT timed out"). Route the relayer through the
+// same-origin Vite proxy (/relayer -> https://relayer.testnet.zama.org/v2) so the
+// SDK never makes a cross-origin POST. The SDK validates relayerUrl as an ABSOLUTE
+// URL, so use window.location.origin (not the bare "/relayer" relative path).
 const relayerUrl =
-  (import.meta.env.VITE_SEPOLIA_RELAYER_URL as string | undefined) ?? 'https://relayer.sepolia.zama.dev';
+  (import.meta.env.VITE_RELAYER_PROXY as string | undefined) ??
+  `${window.location.origin}/relayer`;
 
 const zamaChain = {
   ...sepoliaFhe,

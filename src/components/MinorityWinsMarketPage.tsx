@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Users, Coins, Lock, Trophy, Clock, Send, Check, ChevronLeft, MessageCircle, Vote } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { getGame, type GameRoom } from '../data/games';
@@ -30,7 +30,7 @@ function mapContractStatus(status?: number): GameRoom['status'] {
 
 function ImageTile({ label, imageUrl, large = false }: { label: string; imageUrl?: string; large?: boolean }) {
   if (imageUrl) {
-    return <img src={imageUrl} alt={label} className={`${large ? 'h-56' : 'h-40'} w-full object-cover`} />;
+    return <img src={imageUrl} alt={label} crossOrigin="anonymous" className={`${large ? 'h-56' : 'h-40'} w-full object-cover`} />;
   }
 
   return (
@@ -42,7 +42,7 @@ function ImageTile({ label, imageUrl, large = false }: { label: string; imageUrl
 
 export function MinorityWinsMarketPage({ marketId }: { marketId: string }) {
   const game = getGame('minority-win');
-  const { markets } = useMinorityWinMarkets();
+  const { markets, isLoading: marketsLoading, error: marketsError } = useMinorityWinMarkets();
   const room = markets.find((market) => market.id === marketId);
   const isLiveContract = room?.contractGameId !== undefined;
   const contractGameId = room?.contractGameId ?? 0n;
@@ -61,6 +61,10 @@ export function MinorityWinsMarketPage({ marketId }: { marketId: string }) {
   const [messages, setMessages] = useState(room?.messages ?? []);
   const [feedback, setFeedback] = useState('');
 
+  useEffect(() => {
+    setMessages(room?.messages ?? []);
+  }, [room?.id]);
+
   const readyToApprove = isLiveContract && gameInfo && allowance !== undefined && allowance < gameInfo.stake;
   const contractStatus = isLiveContract ? mapContractStatus(gameInfo?.status) : undefined;
   const resolvedStatus = contractStatus ?? room?.status ?? 'OPEN';
@@ -73,11 +77,20 @@ export function MinorityWinsMarketPage({ marketId }: { marketId: string }) {
     return room.options.reduce((min, opt, i, arr) => (opt.votes < arr[min].votes ? i : min), 0);
   }, [room]);
 
+  if (marketsLoading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-carbon pt-32">
+        <CitrineCube size={60} glow="soft" />
+        <p className="mt-6 text-stone" style={{ fontSize: '16px' }}>Loading market from Supabase...</p>
+      </div>
+    );
+  }
+
   if (!game || !room) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-carbon pt-32">
         <CitrineCube size={60} glow="soft" />
-        <p className="mt-6 text-stone" style={{ fontSize: '16px' }}>Market not found.</p>
+        <p className="mt-6 text-stone" style={{ fontSize: '16px' }}>{marketsError ?? 'Market not found.'}</p>
         <button onClick={() => navigate('/game/minority-win')} className="mt-4 text-citrine" style={{ fontSize: '14px' }}>
           Back to MinorityWin
         </button>
@@ -189,7 +202,7 @@ export function MinorityWinsMarketPage({ marketId }: { marketId: string }) {
               <div className="flex items-center gap-2">
                 <Lock size={14} className="text-citrine" />
                 <span className="font-medium uppercase tracking-[0.032em] text-citrine" style={{ fontSize: '10px' }}>
-                  {room.chain} · FHE
+                  {room.chain} ï¿½ FHE
                 </span>
               </div>
             </div>
@@ -322,7 +335,7 @@ export function MinorityWinsMarketPage({ marketId }: { marketId: string }) {
                   <div className="flex items-center gap-3">
                     <Trophy size={20} className="text-citrine" />
                     <div>
-                      <p className="font-medium text-citrine" style={{ fontSize: '16px' }}>{room.options[minorityIdx]?.label} — minority wins</p>
+                      <p className="font-medium text-citrine" style={{ fontSize: '16px' }}>{room.options[minorityIdx]?.label} ï¿½ minority wins</p>
                       <p className="text-stone" style={{ fontSize: '12px' }}>Winners split {livePrizePool} proportional to stake.</p>
                     </div>
                   </div>
