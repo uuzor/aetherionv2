@@ -171,28 +171,19 @@ export function useSubmitPick(contractAddress: Address = MINORITY_WINS_ADDRESS) 
       }
       console.log(choice)
 
-      try {
-        const encry = await encrypt.mutateAsync({
-          values: [{ value: BigInt(choice), type: 'euint8' }],
-          contractAddress,
-          userAddress: address,
-        });
-        console.log(encry)
-      } catch (error) {
-        console.log(error)
-      }
-
       const encrypted = await encrypt.mutateAsync({
         values: [{ value: BigInt(choice), type: 'euint8' }],
         contractAddress,
         userAddress: address,
       });
 
+      console.log(encrypted)
+
       const encryptedChoice = encrypted.encryptedValues[0];
       if (!encryptedChoice) {
         throw new Error('Encryption did not return a handle.');
       }
-
+      console.log([gameId, encryptedChoice, encrypted.inputProof])
       return writeContractAsync({
         address: contractAddress,
         abi: MINORITY_WINS_ABI,

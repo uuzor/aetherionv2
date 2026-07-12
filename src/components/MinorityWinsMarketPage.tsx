@@ -4,7 +4,7 @@ import { useAccount } from 'wagmi';
 import { getGame, type GameRoom } from '../data/games';
 import { navigate } from '../router';
 import { CitrineCube } from './CitrineCube';
-import { useApproveToken, useMinorityGame, useSubmitPick, useTokenAllowance, useTokenMetadata } from '../lib/hooks';
+import { useApproveToken,  useMinorityGame, useSubmitPick, useTokenAllowance, useTokenMetadata } from '../lib/hooks';
 import { formatTokenAmount, MINORITY_WINS_ADDRESS, statusLabel } from '../lib/minority';
 import { useMinorityWinMarkets } from '../lib/minority-win-markets';
 
@@ -121,6 +121,7 @@ export function MinorityWinsMarketPage({ marketId }: { marketId: string }) {
     setFeedback('Encrypting your vote and submitting to the contract...');
 
     try {
+      console.log(gameInfo)
       await submitPick(contractGameId, selectedOption);
       await Promise.all([refetch(), refetchAllowance()]);
       setFeedback('Vote encrypted and submitted on-chain.');
